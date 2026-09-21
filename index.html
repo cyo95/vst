@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calculadora: Capital para vivir sin trabajar</title>
+<style>
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    --bg: #faf9f7;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --border: #e5e2dc;
+    --accent: #2f6b4f;
+    --accent-soft: #e8f2ec;
+    --danger: #b3462c;
+    --danger-soft: #fbeae5;
+    --warn: #a3781d;
+    --warn-soft: #fbf3e0;
+    --track: #e5e2dc;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17181a;
+      --card: #202225;
+      --text: #ecebe8;
+      --text-muted: #9b9a96;
+      --border: #34363a;
+      --accent: #6fbf95;
+      --accent-soft: #1e2f27;
+      --danger: #e08066;
+      --danger-soft: #33231d;
+      --warn: #d9ae56;
+      --warn-soft: #332c1a;
+      --track: #34363a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17181a;
+    --card: #202225;
+    --text: #ecebe8;
+    --text-muted: #9b9a96;
+    --border: #34363a;
+    --accent: #6fbf95;
+    --accent-soft: #1e2f27;
+    --danger: #e08066;
+    --danger-soft: #33231d;
+    --warn: #d9ae56;
+    --warn-soft: #332c1a;
+    --track: #34363a;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100%;
+    padding: 24px 16px 48px;
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    margin: 0 0 24px;
+    line-height: 1.4;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card h2 {
+    font-size: 0.95rem;
+    font-weight: 650;
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .field {
+    margin-bottom: 18px;
+  }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .field-label .val {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--track);
+    outline: none;
+    margin: 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--card);
+    box-shadow: 0 0 0 1px var(--border);
+    cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--card);
+    box-shadow: 0 0 0 1px var(--border);
+    cursor: pointer;
+    border: none;
+  }
+  input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .result-card {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 22px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .result-card.bad {
+    background: var(--danger-soft);
+    border-color: var(--danger);
+  }
+  .result-label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .result-value {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+  }
+  .result-card.bad .result-value { color: var(--danger); }
+  .result-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .stat {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
+  }
+  .stat-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 650;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--warn-soft);
+    color: var(--warn);
+    margin-left: 8px;
+  }
+  .actual-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .actual-toggle input {
+    width: 16px; height: 16px;
+  }
+  canvas {
+    width: 100%;
+    height: 220px;
+    display: block;
+  }
+  .chart-wrap {
+    overflow-x: auto;
+  }
+  .legend {
+    display: flex;
+    gap: 16px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    display: inline-block;
+  }
+  .note {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .foot {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 20px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>¿Cuánto capital necesitas para vivir sin trabajar?</h1>
+  <p class="subtitle">Calcula el capital necesario para que tu valor <strong>real</strong> (ajustado a inflación) nunca disminuya, después de impuestos, mientras retiras una renta mensual fija en poder de compra.</p>
+
+  <div class="card">
+    <h2>🎯 Tu objetivo</h2>
+    <div class="field">
+      <div class="field-label">Renta mensual deseada <span class="val" id="v-income">1.400 €</span></div>
+      <input type="range" id="income" min="300" max="5000" step="50" value="1400">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📈 Supuestos de mercado</h2>
+    <div class="field">
+      <div class="field-label">Rentabilidad nominal anual esperada <span class="val" id="v-return">6,0 %</span></div>
+      <input type="range" id="return" min="1" max="12" step="0.1" value="6">
+    </div>
+    <div class="field">
+      <div class="field-label">Inflación anual esperada <span class="val" id="v-inflation">2,5 %</span></div>
+      <input type="range" id="inflation" min="0" max="8" step="0.1" value="2.5">
+    </div>
+    <div class="field">
+      <div class="field-label">Tipo impositivo efectivo sobre ganancias <span class="val" id="v-tax">21 %</span></div>
+      <input type="range" id="tax" min="0" max="30" step="1" value="21">
+    </div>
+  </div>
+
+  <div class="result-card" id="result-card">
+    <div class="result-label">Capital necesario para que el valor real nunca baje</div>
+    <div class="result-value" id="v-capital">—</div>
+    <div class="result-sub" id="v-capital-sub"></div>
+  </div>
+
+  <div class="card">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-label">Rent. nominal neta de impuestos</div>
+        <div class="stat-value" id="v-netreturn">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Rent. real neta (después de inflación)</div>
+        <div class="stat-value" id="v-realreturn">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Retiro anual necesario</div>
+        <div class="stat-value" id="v-annual">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">% de retiro sobre el capital</div>
+        <div class="stat-value" id="v-rate">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔍 Comprobar con tu capital actual</h2>
+    <div class="field">
+      <div class="field-label">Capital disponible <span class="val" id="v-actual">500.000 €</span></div>
+      <input type="range" id="actual" min="0" max="1500000" step="5000" value="500000">
+    </div>
+    <div id="actual-result"></div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Evolución a 30 años (con tu capital actual)</h2>
+    <div class="chart-wrap">
+      <canvas id="chart" width="600" height="220"></canvas>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:#2f6b4f"></i> Valor nominal</span>
+      <span><i class="dot" style="background:#b3462c"></i> Valor real (poder de compra de hoy)</span>
+    </div>
+    <div class="note" id="chart-note"></div>
+  </div>
+
+  <div class="note" style="border-top:none;padding-top:0;">
+    <strong>Cómo se calcula:</strong> si retiras cada año una renta que crece con la inflación (para mantener el mismo poder de compra), el capital nunca pierde valor real cuando el <em>retiro inicial</em> es igual al capital multiplicado por (rentabilidad nominal neta de impuestos − inflación). De ahí: <em>capital necesario = renta anual ÷ (rentabilidad neta de impuestos − inflación)</em>. Si la inflación supera a la rentabilidad neta de impuestos, ningún capital finito es suficiente para mantener el valor real indefinidamente reduciendo solo con los intereses.
+  </div>
+
+  <div class="foot">
+    Esto es una herramienta orientativa, no asesoramiento financiero ni fiscal. Los rendimientos de mercado varían y no son constantes año a año; este cálculo asume una rentabilidad media estable, lo que en la práctica no ocurre (secuencia de rentabilidad, volatilidad, cambios normativos fiscales, etc.).
+  </div>
+</div>
+
+<script>
+function fmtEUR(n, decimals) {
+  decimals = decimals === undefined ? 0 : decimals;
+  return n.toLocaleString('es-ES', {minimumFractionDigits: decimals, maximumFractionDigits: decimals}) + ' €';
+}
+function fmtPct(n) {
+  return n.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' %';
+}
+
+const $ = id => document.getElementById(id);
+
+const incomeEl = $('income'), returnEl = $('return'), inflationEl = $('inflation'), taxEl = $('tax'), actualEl = $('actual');
+
+function isDark() {
+  const attr = document.documentElement.getAttribute('data-theme');
+  if (attr === 'dark') return true;
+  if (attr === 'light') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function calc() {
+  const monthlyIncome = parseFloat(incomeEl.value);
+  const nominalReturn = parseFloat(returnEl.value) / 100;
+  const inflation = parseFloat(inflationEl.value) / 100;
+  const tax = parseFloat(taxEl.value) / 100;
+  const actualCapital = parseFloat(actualEl.value);
+
+  $('v-income').textContent = fmtEUR(monthlyIncome);
+  $('v-return').textContent = fmtPct(parseFloat(returnEl.value));
+  $('v-inflation').textContent = fmtPct(parseFloat(inflationEl.value));
+  $('v-tax').textContent = Math.round(tax*100) + ' %';
+  $('v-actual').textContent = fmtEUR(actualCapital);
+
+  const annualIncome = monthlyIncome * 12;
+  const netNominalReturn = nominalReturn * (1 - tax);
+  const realNetReturn = (1 + netNominalReturn) / (1 + inflation) - 1;
+
+  $('v-netreturn').textContent = fmtPct(netNominalReturn*100);
+  $('v-realreturn').textContent = fmtPct(realNetReturn*100);
+  $('v-annual').textContent = fmtEUR(annualIncome);
+
+  const resultCard = $('result-card');
+  let requiredCapital = null;
+
+  if (realNetReturn <= 0.0001) {
+    $('v-capital').textContent = 'No es posible';
+    $('v-capital-sub').textContent = 'La rentabilidad neta de impuestos no supera la inflación: ningún capital finito mantiene el valor real reduciendo solo con las ganancias.';
+    resultCard.classList.add('bad');
+    $('v-rate').textContent = '—';
+  } else {
+    requiredCapital = annualIncome / realNetReturn;
+    $('v-capital').textContent = fmtEUR(requiredCapital);
+    $('v-capital-sub').textContent = 'Manteniendo el poder de compra de ' + fmtEUR(monthlyIncome) + '/mes para siempre';
+    resultCard.classList.remove('bad');
+    $('v-rate').textContent = fmtPct((annualIncome/requiredCapital)*100);
+  }
+
+  // Check with actual capital
+  const actualResultDiv = $('actual-result');
+  if (realNetReturn <= 0.0001) {
+    actualResultDiv.innerHTML = '<div class="stat" style="margin-top:8px;"><div class="stat-value" style="color:var(--danger)">Con estos supuestos, ningún capital es sostenible a largo plazo en términos reales.</div></div>';
+  } else {
+    const sustainableAnnual = actualCapital * realNetReturn;
+    const sustainableMonthly = sustainableAnnual / 12;
+    const diff = actualCapital - requiredCapital;
+    let msg, cls;
+    if (diff >= 0) {
+      msg = 'Tu capital <strong>cubre</strong> el objetivo. Con este capital podrías retirar hasta ' + fmtEUR(sustainableMonthly,0) + '/mes sin perder valor real (margen de ' + fmtEUR(diff,0) + ').';
+      cls = 'accent';
+    } else {
+      msg = 'Tu capital <strong>no llega</strong> al objetivo. Con este capital, la renta mensual sostenible sin perder valor real es de ' + fmtEUR(sustainableMonthly,0) + '/mes (te faltan ' + fmtEUR(-diff,0) + ').';
+      cls = 'danger';
+    }
+    actualResultDiv.innerHTML = '<div class="stat" style="margin-top:8px;border-color:var(--'+cls+')"><div class="stat-label">Resultado</div><div style="font-size:0.9rem;line-height:1.5;margin-top:4px;">' + msg + '</div></div>';
+  }
+
+  drawChart(actualCapital, netNominalReturn, inflation, annualIncome);
+}
+
+function drawChart(capital, netNominalReturn, inflation, annualIncome) {
+  const canvas = $('chart');
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.clientWidth || 600;
+  const cssH = 220;
+  canvas.width = cssW * dpr;
+  canvas.height = cssH * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0,0,cssW,cssH);
+
+  const years = 30;
+  let nominal = capital;
+  const nominalSeries = [nominal];
+  const realSeries = [nominal];
+  for (let y = 1; y <= years; y++) {
+    const withdrawal = annualIncome * Math.pow(1+inflation, y-1);
+    nominal = nominal * (1+netNominalReturn) - withdrawal;
+    nominalSeries.push(Math.max(nominal, 0));
+    realSeries.push(Math.max(nominal, 0) / Math.pow(1+inflation, y));
+    if (nominal <= 0) {
+      for (let k = y+1; k <= years; k++) { nominalSeries.push(0); realSeries.push(0); }
+      break;
+    }
+  }
+
+  const maxVal = Math.max(...nominalSeries, ...realSeries, capital) * 1.1 || 1;
+  const padL = 55, padR = 10, padT = 15, padB = 25;
+  const plotW = cssW - padL - padR;
+  const plotH = cssH - padT - padB;
+
+  const dark = isDark();
+  const textColor = dark ? '#9b9a96' : '#6b6b6b';
+  const gridColor = dark ? '#34363a' : '#e5e2dc';
+
+  ctx.strokeStyle = gridColor;
+  ctx.fillStyle = textColor;
+  ctx.font = '10px -apple-system, sans-serif';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const yv = maxVal * i / 4;
+    const yPix = padT + plotH - (yv/maxVal)*plotH;
+    ctx.beginPath();
+    ctx.moveTo(padL, yPix);
+    ctx.lineTo(cssW-padR, yPix);
+    ctx.stroke();
+    ctx.fillText((yv/1000).toFixed(0)+'k', 4, yPix+3);
+  }
+  ctx.fillText('Año 0', padL-2, cssH-8);
+  ctx.fillText('Año 30', cssW-padR-30, cssH-8);
+
+  function plotLine(series, color) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    series.forEach((v, i) => {
+      const x = padL + (i/years)*plotW;
+      const y = padT + plotH - (v/maxVal)*plotH;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  }
+  plotLine(nominalSeries, '#2f6b4f');
+  plotLine(realSeries, '#b3462c');
+
+  const finalNominal = nominalSeries[nominalSeries.length-1];
+  const finalReal = realSeries[realSeries.length-1];
+  const note = $('chart-note');
+  if (finalNominal <= 0) {
+    note.innerHTML = 'Con este capital, el dinero <strong>se agota antes de 30 años</strong> reduciendo la renta indexada a inflación.';
+  } else if (finalReal >= capital*0.98) {
+    note.innerHTML = 'Con este capital, el valor real se mantiene estable durante 30 años reduciendo la renta indexada a inflación. ✅';
+  } else {
+    note.innerHTML = 'Con este capital, el valor real disminuye lentamente a lo largo de 30 años (queda ' + fmtEUR(finalReal,0) + ' en poder de compra de hoy).';
+  }
+}
+
+[incomeEl, returnEl, inflationEl, taxEl, actualEl].forEach(el => el.addEventListener('input', calc));
+window.addEventListener('resize', calc);
+calc();
+</script>
+</body>
+</html>
